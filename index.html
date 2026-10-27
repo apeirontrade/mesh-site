@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mesh.algo · the Algorand town square</title>
+<meta name="description" content="An Algorand-only message board where only .algo (NFD) holders can post. No sign-up: your NFD is your login. Posts are post-quantum signed. In development.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230d1b2a'/><circle cx='20' cy='22' r='6' fill='%2333e0c6'/><circle cx='44' cy='22' r='6' fill='%2333e0c6'/><circle cx='32' cy='44' r='6' fill='%2333e0c6'/><path d='M20 22L44 22L32 44Z' stroke='%2333e0c6' stroke-width='3' fill='none'/></svg>">
+<style>
+:root{
+  --bg:#f6f8fb; --surface:#ffffff; --ink:#0d1b2a; --muted:#51606f; --line:#dde3ea;
+  --accent:#0c8f7e; --accent-ink:#ffffff; --soft:#e6f6f3; --warn:#9a5b00; --warn-bg:#fff4e0;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#081321; --surface:#0f1f33; --ink:#e8eef5; --muted:#9fb0c2; --line:#1f3550;
+    --accent:#33e0c6; --accent-ink:#06231f; --soft:#0f2e33; --warn:#ffcc80; --warn-bg:#2b2010;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#081321; --surface:#0f1f33; --ink:#e8eef5; --muted:#9fb0c2; --line:#1f3550;
+  --accent:#33e0c6; --accent-ink:#06231f; --soft:#0f2e33; --warn:#ffcc80; --warn-bg:#2b2010;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px}
+header{padding:20px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:-.01em;color:var(--ink);text-decoration:none}
+.logo svg{width:34px;height:34px}
+.pill{font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--warn-bg);color:var(--warn);white-space:nowrap}
+.hero{padding:44px 0 32px}
+h1{font-size:clamp(34px,6vw,58px);line-height:1.05;letter-spacing:-.03em;margin:0 0 18px}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:clamp(18px,2.4vw,21px);color:var(--muted);max-width:660px;margin:0 0 28px}
+.post{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;max-width:580px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+.who{display:flex;align-items:center;gap:10px;font-size:15px}
+.av{width:36px;height:36px;border-radius:50%;background:var(--soft);display:grid;place-items:center;color:var(--accent);font-weight:700}
+.who b{color:var(--ink)} .who span{color:var(--muted)}
+.body{margin:10px 0 12px}
+.meta{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+section{padding:36px 0;border-top:1px solid var(--line)}
+h2{font-size:26px;letter-spacing:-.02em;margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.card h3{margin:0 0 6px;font-size:18px}
+.card p{margin:0;color:var(--muted);font-size:15.5px}
+.num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--soft);color:var(--accent);font-weight:700;margin-bottom:8px}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.ladder{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.ladder li{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.ladder .tag{flex:none;font-size:12.5px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--soft);color:var(--accent)}
+.ladder .tag.next{background:var(--warn-bg);color:var(--warn)}
+.ladder p{margin:0;font-size:15.5px}
+.honest p{color:var(--muted);margin:0 0 10px}
+footer{padding:28px 0 40px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="logo" href="#" aria-label="mesh.algo home">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="20" cy="22" r="6" fill="var(--accent)"/><circle cx="44" cy="22" r="6" fill="var(--accent)"/><circle cx="32" cy="44" r="6" fill="var(--accent)"/><path d="M20 22L44 22L32 44Z" stroke="var(--accent)" stroke-width="3" fill="none"/></svg>
+      mesh.algo
+    </a>
+    <span class="pill">In development · design preview</span>
+  </header>
+
+  <div class="hero">
+    <h1>The <em>Algorand</em> town square.<br>Only .algo names can post.</h1>
+    <p class="lede">An Algorand-only message board without the noise. Anyone can read. Only people who own an NFD (.algo name) can post. There's no sign-up: your NFD is your login. Every post is signed with post-quantum cryptography.</p>
+    <div class="post" aria-label="Example post">
+      <div class="who"><div class="av">b</div><div><b>blueshirtguy.algo</b> <span>· 4-ring name · #governance</span></div></div>
+      <div class="body">What do people think of the latest xGov proposal? I'd love a discussion without the bots.</div>
+      <div class="meta"><span>♥ 24</span><span>💬 7 replies</span><span>⚡ tipped 12 ALGO</span><span>🔒 PQ-signed</span></div>
+    </div>
+  </div>
+
+  <section>
+    <h2>How it works</h2>
+    <div class="grid">
+      <div class="card"><span class="num">1</span><h3>Read freely</h3><p>Anyone can browse the board, with no wallet needed.</p></div>
+      <div class="card"><span class="num">2</span><h3>Own an NFD to post</h3><p>Connect the wallet that holds your .algo name. That's your login, with no form and no password.</p></div>
+      <div class="card"><span class="num">3</span><h3>Post for a fraction of a cent</h3><p>Each post costs about the same as an Algorand transaction, so spam gets expensive.</p></div>
+      <div class="card"><span class="num">4</span><h3>Like free, tip directly</h3><p>Reactions are free. Tips go 100% to the post's author.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Why it's quiet in here</h2>
+    <div class="tablewrap">
+    <table>
+      <tr><th>Noise source</th><th>How mesh handles it</th></tr>
+      <tr><td>Bots and fake accounts</td><td>Every poster must own a current NFD, and expired names can't post.</td></tr>
+      <tr><td>Floods and spam</td><td>A tiny per-post fee that rises sharply for anyone posting dozens of times a day.</td></tr>
+      <tr><td>Off-topic noise</td><td>An Algorand community by design, with channels for dev, defi, nft, governance and news.</td></tr>
+      <tr><td>Engagement-bait ranking</td><td>A chronological feed by default, plus an optional "long-held names first" view.</td></tr>
+      <tr><td>Impersonation</td><td>Projects post from their own verified NFDs.</td></tr>
+    </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Post-quantum by design</h2>
+    <ul class="ladder">
+      <li><span class="tag">Every post</span><p><b>Signed with ML-DSA</b>, a post-quantum signature tied to your name, so nobody can forge a post from you, even with a future quantum computer.</p></li>
+      <li><span class="tag">Every hour</span><p><b>A fingerprint of new posts is stamped on Algorand</b> by mesh's Falcon post-quantum account, so nobody can silently edit or backdate history, including us.</p></li>
+      <li><span class="tag">Optional</span><p><b>Fully quantum-safe badge:</b> owners who move their name to an Algorand Falcon account get end-to-end post-quantum protection.</p></li>
+      <li><span class="tag next">Next</span><p><b>Private messages</b> with post-quantum encryption (ML-KEM-768 + X25519) between any two names.</p></li>
+    </ul>
+  </section>
+
+  <section class="honest">
+    <h2>Honest status</h2>
+    <p><b>This is a design preview, not a working product yet.</b> Nothing can be posted today. The platform is being built and tested on Algorand testnet first.</p>
+    <p>Prices shown are launch targets and may change before launch. The cryptography code will need an independent security review before anyone relies on it.</p>
+    <p>Disclosure: the person building mesh owns a number of .algo names.</p>
+  </section>
+
+  <footer>
+    Built in the open by <b>blueshirtguy.algo</b> with Claude (Anthropic's AI). Not affiliated with NFDomains or the Algorand Foundation.
+    <br><code>mesh.algo.xyz</code>
+  </footer>
+</div>
+</body>
+</html>
