@@ -4,128 +4,190 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>mesh.algo · the Algorand town square</title>
-<meta name="description" content="An Algorand-only message board where only .algo (NFD) holders can post. No sign-up: your NFD is your login. Posts are post-quantum signed. In development.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230d1b2a'/><circle cx='20' cy='22' r='6' fill='%2333e0c6'/><circle cx='44' cy='22' r='6' fill='%2333e0c6'/><circle cx='32' cy='44' r='6' fill='%2333e0c6'/><path d='M20 22L44 22L32 44Z' stroke='%2333e0c6' stroke-width='3' fill='none'/></svg>">
+<meta name="description" content="The Algorand town square. Your .algo name is your voice. Read free, post with your name. Opening soon.">
+<meta name="theme-color" content="#1a0c50">
+<meta property="og:title" content="mesh.algo · the Algorand town square">
+<meta property="og:description" content="Your .algo name is your voice. Opening soon.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%231a0c50'/><path d='M20 22L44 22L32 44Z' stroke='%23c2acff' stroke-width='3.5' fill='none' stroke-linejoin='round'/><circle cx='20' cy='22' r='7.5' fill='%233ee8ff'/><circle cx='44' cy='22' r='7.5' fill='%23ff5bdc'/><circle cx='32' cy='44' r='7.5' fill='%23ffc847'/></svg>">
 <style>
-:root{
-  --bg:#f6f8fb; --surface:#ffffff; --ink:#0d1b2a; --muted:#51606f; --line:#dde3ea;
-  --accent:#0c8f7e; --accent-ink:#ffffff; --soft:#e6f6f3; --warn:#9a5b00; --warn-bg:#fff4e0;
+@font-face { font-family: "Space Grotesk"; src: url("fonts/space-grotesk-latin-wght-normal.woff2") format("woff2-variations"); font-weight: 300 700; font-display: swap; }
+@font-face { font-family: "Inter"; src: url("fonts/inter-latin-wght-normal.woff2") format("woff2-variations"); font-weight: 100 900; font-display: swap; }
+:root {
+  color-scheme: dark;
+  --ink: #ffffff; --muted: #ddd6ff; --faint: #b3abe2; --line: rgba(214, 198, 255, 0.34);
+  --cyan: #4af2ff; --magenta: #ff6be3; --amber: #ffd35c; --lime: #b4ff7a; --violet: #b69bff; --pink: #ff6ba8;
+  --accent: #8ff6ff; --accent-ink: #12082e;
+  --grad: linear-gradient(110deg, #4af2ff 0%, #c2acff 45%, #ff8ff0 75%, #ffe07a 100%);
+  --display: "Space Grotesk", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#081321; --surface:#0f1f33; --ink:#e8eef5; --muted:#9fb0c2; --line:#1f3550;
-    --accent:#33e0c6; --accent-ink:#06231f; --soft:#0f2e33; --warn:#ffcc80; --warn-bg:#2b2010;
-  }
+* { box-sizing: border-box; }
+html { background: #1a0c50; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; min-height: 100vh; color: var(--ink); font: 17px/1.55 var(--body); overflow-x: hidden;
+  background:
+    radial-gradient(62% 48% at 10% 6%, rgba(168, 120, 255, 0.7), transparent 64%),
+    radial-gradient(52% 44% at 90% 12%, rgba(255, 107, 227, 0.55), transparent 64%),
+    radial-gradient(58% 48% at 74% 94%, rgba(74, 242, 255, 0.45), transparent 64%),
+    radial-gradient(44% 36% at 6% 90%, rgba(255, 211, 92, 0.32), transparent 64%),
+    radial-gradient(40% 30% at 50% 50%, rgba(111, 155, 255, 0.28), transparent 70%),
+    linear-gradient(160deg, #24105e 0%, #1a0c50 38%, #142a78 100%);
+  background-attachment: fixed;
 }
-:root[data-theme="dark"]{
-  --bg:#081321; --surface:#0f1f33; --ink:#e8eef5; --muted:#9fb0c2; --line:#1f3550;
-  --accent:#33e0c6; --accent-ink:#06231f; --soft:#0f2e33; --warn:#ffcc80; --warn-bg:#2b2010;
+a { color: var(--accent); }
+
+/* Night sky: two twinkling star layers and six neon shooting stars. */
+.cosmos { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.cosmos::before, .cosmos::after { content: ""; position: absolute; inset: -50px; background-repeat: repeat; }
+.cosmos::before {
+  background-image:
+    radial-gradient(1.2px 1.2px at 22px 34px, #fff 50%, transparent 52%),
+    radial-gradient(1px 1px at 68px 88px, rgba(255, 255, 255, 0.85) 50%, transparent 52%),
+    radial-gradient(1.6px 1.6px at 118px 22px, #d6f6ff 50%, transparent 52%),
+    radial-gradient(1px 1px at 162px 132px, #fff 50%, transparent 52%),
+    radial-gradient(1.4px 1.4px at 196px 64px, #ffd9fb 50%, transparent 52%);
+  background-size: 220px 170px; opacity: 0.9; animation: twinkle 5s ease-in-out infinite alternate;
 }
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-a{color:var(--accent)}
-.wrap{max-width:960px;margin:0 auto;padding:0 16px}
-header{padding:20px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:-.01em;color:var(--ink);text-decoration:none}
-.logo svg{width:34px;height:34px}
-.pill{font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--warn-bg);color:var(--warn);white-space:nowrap}
-.hero{padding:44px 0 32px}
-h1{font-size:clamp(34px,6vw,58px);line-height:1.05;letter-spacing:-.03em;margin:0 0 18px}
-h1 em{font-style:normal;color:var(--accent)}
-.lede{font-size:clamp(18px,2.4vw,21px);color:var(--muted);max-width:660px;margin:0 0 28px}
-.post{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;max-width:580px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
-.who{display:flex;align-items:center;gap:10px;font-size:15px}
-.av{width:36px;height:36px;border-radius:50%;background:var(--soft);display:grid;place-items:center;color:var(--accent);font-weight:700}
-.who b{color:var(--ink)} .who span{color:var(--muted)}
-.body{margin:10px 0 12px}
-.meta{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
-section{padding:36px 0;border-top:1px solid var(--line)}
-h2{font-size:26px;letter-spacing:-.02em;margin:0 0 18px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
-.card h3{margin:0 0 6px;font-size:18px}
-.card p{margin:0;color:var(--muted);font-size:15.5px}
-.num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--soft);color:var(--accent);font-weight:700;margin-bottom:8px}
-.tablewrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:15px;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
-.ladder{list-style:none;padding:0;margin:0;display:grid;gap:10px}
-.ladder li{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
-.ladder .tag{flex:none;font-size:12.5px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--soft);color:var(--accent)}
-.ladder .tag.next{background:var(--warn-bg);color:var(--warn)}
-.ladder p{margin:0;font-size:15.5px}
-.honest p{color:var(--muted);margin:0 0 10px}
-footer{padding:28px 0 40px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em}
+.cosmos::after {
+  background-image:
+    radial-gradient(1px 1px at 40px 120px, rgba(255, 255, 255, 0.7) 50%, transparent 52%),
+    radial-gradient(2px 2px at 150px 40px, rgba(190, 240, 255, 0.95) 50%, transparent 52%),
+    radial-gradient(1px 1px at 260px 200px, #fff 50%, transparent 52%),
+    radial-gradient(1.8px 1.8px at 300px 90px, rgba(255, 220, 140, 0.9) 50%, transparent 52%);
+  background-size: 340px 260px; opacity: 0.55; animation: twinkle 7s ease-in-out -3s infinite alternate, drift 140s linear infinite;
+}
+@keyframes twinkle { from { opacity: 0.35; } to { opacity: 0.9; } }
+@keyframes drift { to { transform: translate3d(-340px, -260px, 0); } }
+.shoot { position: absolute; top: 0; left: 0; width: var(--tail, 170px); height: 2px; border-radius: 999px; opacity: 0; will-change: transform, opacity;
+  background: linear-gradient(90deg, var(--c) 0%, color-mix(in srgb, var(--c) 45%, transparent) 28%, transparent 100%);
+  filter: drop-shadow(0 0 4px var(--c)) drop-shadow(0 0 12px var(--c));
+  animation: shoot var(--d, 12s) linear var(--delay, 0s) infinite; }
+.shoot::before { content: ""; position: absolute; left: -3px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: #fff; box-shadow: 0 0 6px 2px var(--c), 0 0 16px 5px var(--c); }
+.s0 { --c: #3ee8ff; --x: 84vw; --y: 6vh; --d: 11s; --delay: 1.2s; }
+.s1 { --c: #ff5bdc; --x: 66vw; --y: 20vh; --d: 13s; --delay: 4.6s; }
+.s2 { --c: #ffc847; --x: 98vw; --y: 34vh; --d: 15s; --delay: 8.1s; }
+.s3 { --c: #a3ff6b; --x: 50vw; --y: 3vh; --d: 17s; --delay: 11.4s; }
+.s4 { --c: #b49cff; --x: 76vw; --y: 46vh; --d: 12.5s; --delay: 6.8s; }
+.s5 { --c: #ff5c9d; --x: 92vw; --y: 14vh; --d: 19s; --delay: 14.2s; }
+@keyframes shoot {
+  0% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(-32deg) translateX(0) scaleX(0.25); }
+  1.5% { opacity: 1; }
+  8% { opacity: 1; transform: translate(var(--x), var(--y)) rotate(-32deg) translateX(calc(var(--run, 560px) * -1)) scaleX(1); }
+  11%, 100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(-32deg) translateX(calc(var(--run, 560px) * -1.25)) scaleX(0.5); }
+}
+
+.wrap { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; padding: 0 16px 48px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 0; }
+.logo { display: flex; align-items: center; gap: 10px; font: 800 26px/1 var(--display); letter-spacing: -0.03em; text-decoration: none; }
+.logo svg { width: 36px; height: 36px; filter: drop-shadow(0 0 10px rgba(126, 240, 255, 0.55)); }
+.logo span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.soon { font: 700 13px var(--display); padding: 6px 12px; border-radius: 999px; background: rgba(255, 211, 92, 0.16); border: 1px solid rgba(255, 211, 92, 0.4); color: var(--amber); white-space: nowrap; }
+
+.hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 36px; align-items: center; padding: 34px 0 30px; }
+h1 { margin: 0 0 14px; font: 800 clamp(42px, 7vw, 74px)/0.98 var(--display); letter-spacing: -0.045em; }
+h1 em { font-style: normal; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lede { margin: 0 0 24px; font-size: clamp(18px, 2.4vw, 21px); color: var(--muted); }
+.via { display: inline-block; margin: 0 0 16px; font: 700 13.5px var(--display); padding: 6px 12px; border-radius: 999px; background: rgba(74, 242, 255, 0.14); border: 1px solid rgba(74, 242, 255, 0.4); color: var(--accent); }
+.ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 999px; font: 700 16px var(--display); text-decoration: none; color: var(--ink); border: 1px solid rgba(224, 210, 255, 0.55); background: rgba(255, 255, 255, 0.1); }
+.btn.primary { background: var(--grad); background-size: 160% 100%; color: var(--accent-ink); border-color: transparent; box-shadow: 0 10px 30px rgba(255, 107, 227, 0.4); animation: shimmer 6s ease-in-out infinite alternate; }
+@keyframes shimmer { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+
+/* Preview cards: clearly labelled sample posts in the app's style. */
+.preview { position: relative; }
+.preview .label { position: absolute; top: -12px; right: 14px; z-index: 2; font: 700 11.5px var(--display); letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: #2a1a72; border: 1px solid var(--line); color: var(--muted); }
+.card { position: relative; overflow: hidden; border-radius: 20px; padding: 15px 16px 12px; margin-bottom: 12px; background: linear-gradient(180deg, rgba(104, 76, 214, 0.46), rgba(58, 36, 150, 0.42)); border: 1px solid var(--line); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 14px 40px rgba(20, 6, 70, 0.35); -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%); }
+.card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, var(--c1), var(--c2), transparent 85%); }
+.card:nth-child(3) { transform: translateX(26px) rotate(1.2deg); }
+.who { display: flex; align-items: center; gap: 11px; }
+.av { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font: 800 17px var(--display); color: #fff; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45); background: radial-gradient(circle at 30% 25%, hsl(var(--h) 100% 78%), hsl(calc(var(--h) + 40) 92% 56%) 55%, hsl(calc(var(--h) + 90) 85% 38%)); box-shadow: 0 0 18px hsl(var(--h) 100% 65% / 0.5); }
+.who b { font: 700 15.5px var(--display); display: block; }
+.who small { color: var(--c1); font-weight: 700; font-size: 13px; }
+.who small i { color: var(--muted); font-style: normal; font-weight: 500; }
+.card p { margin: 9px 0 8px; font-size: 15.5px; line-height: 1.5; }
+.acts { display: flex; gap: 18px; font: 700 13.5px var(--display); color: var(--muted); }
+.acts .like { color: var(--pink); } .acts .tip { color: var(--amber); }
+
+/* Four ideas, one line each. */
+.ideas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0 28px; }
+.idea { border-radius: 18px; padding: 16px; background: rgba(40, 22, 110, 0.5); border: 1px solid var(--line); }
+.idea .e { font-size: 26px; display: block; margin-bottom: 8px; }
+.idea b { font: 700 16px/1.3 var(--display); }
+.chans { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 6px 0 30px; }
+.chans span { font: 700 14px var(--display); padding: 7px 14px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); background: color-mix(in srgb, var(--c) 16%, rgba(40, 22, 110, 0.55)); }
+
+footer { border-top: 1px solid var(--line); padding-top: 18px; color: var(--faint); font-size: 13.5px; line-height: 1.6; }
+footer b { color: var(--muted); }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; gap: 28px; padding-top: 18px; }
+  .card:nth-child(3) { transform: none; }
+  .ideas { grid-template-columns: repeat(2, 1fr); }
+  .shoot { --tail: 120px; --run: 380px; }
+}
+@media (max-width: 420px) { .ideas { grid-template-columns: 1fr 1fr; gap: 10px; } .idea { padding: 13px; } .idea b { font-size: 14.5px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
+<div class="cosmos" aria-hidden="true"><i class="shoot s0"></i><i class="shoot s1"></i><i class="shoot s2"></i><i class="shoot s3"></i><i class="shoot s4"></i><i class="shoot s5"></i></div>
 <div class="wrap">
   <header>
-    <a class="logo" href="#" aria-label="mesh.algo home">
-      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="20" cy="22" r="6" fill="var(--accent)"/><circle cx="44" cy="22" r="6" fill="var(--accent)"/><circle cx="32" cy="44" r="6" fill="var(--accent)"/><path d="M20 22L44 22L32 44Z" stroke="var(--accent)" stroke-width="3" fill="none"/></svg>
-      mesh.algo
+    <a class="logo" href="/" aria-label="mesh.algo home">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3ee8ff"/><stop offset=".5" stop-color="#b49cff"/><stop offset="1" stop-color="#ff5bdc"/></linearGradient></defs><path d="M20 22L44 22L32 44Z" stroke="url(#lg)" stroke-width="3.5" fill="none" stroke-linejoin="round"/><circle cx="20" cy="22" r="7.5" fill="#3ee8ff"/><circle cx="44" cy="22" r="7.5" fill="#ff5bdc"/><circle cx="32" cy="44" r="7.5" fill="#ffc847"/></svg>
+      <span>mesh</span>
     </a>
-    <span class="pill">In development · design preview</span>
+    <span class="soon">Opening soon</span>
   </header>
 
-  <div class="hero">
-    <h1>The <em>Algorand</em> town square.<br>Only .algo names can post.</h1>
-    <p class="lede">An Algorand-only message board without the noise. Anyone can read. Only people who own an NFD (.algo name) can post. There's no sign-up: your NFD is your login. Every post is signed with post-quantum cryptography.</p>
-    <div class="post" aria-label="Example post">
-      <div class="who"><div class="av">b</div><div><b>blueshirtguy.algo</b> <span>· 4-ring name · #governance</span></div></div>
-      <div class="body">What do people think of the latest xGov proposal? I'd love a discussion without the bots.</div>
-      <div class="meta"><span>♥ 24</span><span>💬 7 replies</span><span>⚡ tipped 12 ALGO</span><span>🔒 PQ-signed</span></div>
+  <section class="hero">
+    <div>
+      <span class="via" id="via" hidden></span>
+      <h1>Your <em>.algo</em> name is your voice.</h1>
+      <p class="lede">The Algorand town square. Read free. Post with your name.</p>
+      <div class="ctas">
+        <a class="btn primary" href="https://app.nf.domains" target="_blank" rel="noopener">Get a .algo name ↗</a>
+      </div>
     </div>
+    <div class="preview" aria-label="Preview of mesh with sample posts">
+      <span class="label">Preview · sample posts</span>
+      <div class="card" style="--c1:#4af2ff;--c2:#6f9bff">
+        <div class="who"><div class="av" style="--h:190">D</div><div><b>dev.example.algo</b><small>#dev <i>· 2m</i></small></div></div>
+        <p>Shipped our first contract on mainnet today. Feedback welcome.</p>
+        <div class="acts"><span>💬 4</span><span class="like">♥ 12</span><span class="tip">⚡ 3 ALGO</span></div>
+      </div>
+      <div class="card" style="--c1:#ff6be3;--c2:#ffd35c">
+        <div class="who"><div class="av" style="--h:310">A</div><div><b>artist.example.algo</b><small>#nft <i>· 9m</i></small></div></div>
+        <p>New drop tonight. Every piece minted from my own name.</p>
+        <div class="acts"><span>💬 7</span><span class="like">♥ 31</span><span class="tip">⚡ 10 ALGO</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="ideas">
+    <div class="idea"><span class="e">🪪</span><b>Your name is your login</b></div>
+    <div class="idea"><span class="e">⚡</span><b>Tips go 100% to the author</b></div>
+    <div class="idea"><span class="e">💬</span><b>Replies pay the thread-starter</b></div>
+    <div class="idea"><span class="e">🔒</span><b>Every post signed post-quantum</b></div>
   </div>
 
-  <section>
-    <h2>How it works</h2>
-    <div class="grid">
-      <div class="card"><span class="num">1</span><h3>Read freely</h3><p>Anyone can browse the board, with no wallet needed.</p></div>
-      <div class="card"><span class="num">2</span><h3>Own an NFD to post</h3><p>Connect the wallet that holds your .algo name. That's your login, with no form and no password.</p></div>
-      <div class="card"><span class="num">3</span><h3>Post for a fraction of a cent</h3><p>Each post costs about the same as an Algorand transaction, so spam gets expensive.</p></div>
-      <div class="card"><span class="num">4</span><h3>Like free, tip directly</h3><p>Reactions are free. Tips go 100% to the post's author.</p></div>
-    </div>
-  </section>
-
-  <section>
-    <h2>Why it's quiet in here</h2>
-    <div class="tablewrap">
-    <table>
-      <tr><th>Noise source</th><th>How mesh handles it</th></tr>
-      <tr><td>Bots and fake accounts</td><td>Every poster must own a current NFD, and expired names can't post.</td></tr>
-      <tr><td>Floods and spam</td><td>A tiny per-post fee that rises sharply for anyone posting dozens of times a day.</td></tr>
-      <tr><td>Off-topic noise</td><td>An Algorand community by design, with channels for dev, defi, nft, governance and news.</td></tr>
-      <tr><td>Engagement-bait ranking</td><td>A chronological feed by default, plus an optional "long-held names first" view.</td></tr>
-      <tr><td>Impersonation</td><td>Projects post from their own verified NFDs.</td></tr>
-    </table>
-    </div>
-  </section>
-
-  <section>
-    <h2>Post-quantum by design</h2>
-    <ul class="ladder">
-      <li><span class="tag">Every post</span><p><b>Signed with ML-DSA</b>, a post-quantum signature tied to your name, so nobody can forge a post from you, even with a future quantum computer.</p></li>
-      <li><span class="tag">Every hour</span><p><b>A fingerprint of new posts is stamped on Algorand</b> by mesh's Falcon post-quantum account, so nobody can silently edit or backdate history, including us.</p></li>
-      <li><span class="tag">Optional</span><p><b>Fully quantum-safe badge:</b> owners who move their name to an Algorand Falcon account get end-to-end post-quantum protection.</p></li>
-      <li><span class="tag next">Next</span><p><b>Private messages</b> with post-quantum encryption (ML-KEM-768 + X25519) between any two names.</p></li>
-    </ul>
-  </section>
-
-  <section class="honest">
-    <h2>Honest status</h2>
-    <p><b>This is a design preview, not a working product yet.</b> Nothing can be posted today. The platform is being built and tested on Algorand testnet first.</p>
-    <p>Prices shown are launch targets and may change before launch. The cryptography code will need an independent security review before anyone relies on it.</p>
-    <p>Disclosure: the person building mesh owns a number of .algo names.</p>
-  </section>
+  <div class="chans" aria-label="Channels">
+    <span style="--c:#b49cff">💬 general</span><span style="--c:#3ee8ff">🛠️ dev</span><span style="--c:#a3ff6b">📈 defi</span><span style="--c:#ff5bdc">🖼️ nft</span><span style="--c:#ffc847">🏛️ governance</span><span style="--c:#ff9447">📰 news</span>
+  </div>
 
   <footer>
-    Built in the open by <b>blueshirtguy.algo</b> with Claude (Anthropic's AI). Not affiliated with NFDomains or the Algorand Foundation.
-    <br><code>mesh.algo.xyz</code>
+    <b>Opening soon.</b> mesh is in development and not open for posting yet. The posts above are samples.<br>
+    Built in the open by blueshirtguy.algo with Claude (Anthropic's AI). The builder holds many .algo names. Not affiliated with NFDomains or the Algorand Foundation.
   </footer>
 </div>
+<script>
+  // Arrived through one of the redirected names (name.algo.xyz → ?via=name)? Say hi.
+  (function () {
+    try {
+      var v = new URLSearchParams(location.search).get("via");
+      if (v && /^[a-z0-9-]{1,40}(\.[a-z0-9-]{1,40})?$/.test(v)) { var el = document.getElementById("via"); el.textContent = "✨ via " + v + ".algo"; el.hidden = false; }
+    } catch (e) {}
+  })();
+</script>
 </body>
 </html>

@@ -1,0 +1,10 @@
+Fonts in this folder are redistributed unmodified under the SIL Open Font License, Version 1.1.
+
+space-grotesk-latin-wght-normal.woff2
+  Space Grotesk. Copyright 2020 The Space Grotesk Project Authors (https://github.com/floriankarsten/space-grotesk)
+
+inter-latin-wght-normal.woff2
+  Inter. Copyright 2020 The Inter Project Authors (https://github.com/rsms/inter)
+
+Both packaged by Fontsource (https://fontsource.org).
+License text: https://openfontlicense.org/open-font-license-official-text/
